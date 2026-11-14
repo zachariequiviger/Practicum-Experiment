@@ -1,0 +1,654 @@
+---
+output:
+  pdf_document:
+    latex_engine: pdflatex
+fontsize: 11pt
+geometry: margin=1in
+header-includes:
+  - \usepackage{lmodern}
+  - \usepackage{graphicx}
+  - \usepackage{float}
+  - \usepackage{titlesec}
+  - \setlength{\parskip}{0pt}
+  - \setlength{\parindent}{0pt}
+  - \titlespacing*{\section}{0pt}{1.5ex}{0.7ex}
+  - \titlespacing*{\subsection}{0pt}{1ex}{0.4ex}
+---
+
+\begin{center}
+{\LARGE\bfseries Are Rating Scales Reversible?\par}
+\vspace{0.4cm}
+{\large Pre-Analysis Plan\par}
+\vspace{0.07cm}
+{\itshape Zacharie Quiviger\par}
+\vspace{0.07cm}
+{November 13, 2026\par}
+\end{center}
+
+\vspace{0.3cm}
+
+Scholars and political commentators often find it expedient to compare results across different surveys or sources. However, observations may not prove directly comparable if survey instruments differ meaningfully. In this experiment, I will investigate the influence of a marginal change in design on survey results. Specifically, I will study the effects of reversing a 0 to 10 cardinal scale to 10 to 0 on ratings of a single, common painting.
+
+\vspace{0.7cm}
+
+\textbf{Experimental Design}
+
+\vspace{0.2cm}
+
+On November 9, I launched a brief Google Forms survey (i.e., it is currently available and will remain so until November 15, at which point I will download the resulting dataset). The survey asks respondents to rate the work \textit{Baigneurs à Saint-Tropez} by pointillist painter Maximilien Luce (Figure \ref{fig:painting}). The survey exists in two forms: the control group is asked to rate the painting on an ascending scale from 0 to 10 while the treatment group is offered a descending scale from 10 to 0 (Figure \ref{fig:arms}). The analysis will be conducted at the rating level.
+
+\vspace{0.15cm}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/painting.jpg}
+\caption{\textit{Baigneurs à Saint-Tropez by Maximilien Luce (c. 1903)}}
+\label{fig:painting}
+\end{figure}
+
+\vspace{0.15cm}
+
+Raters were asked to provide assistance for the experiment through passive publications on social media. Thus, the ratings constitute a convenience sample and are not representative of the at-large population of ratings for the given artwork. Raters are allocated to experimental arms through simple random assignment with equal probabilities using \textit{allocate.monster}, a redirecting tool for online survey-based experiments. The ratings additionally serve as the outcomes.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{figures/arms.jpg}
+\caption{\textit{Control (left) and treatment (right) rating scales.}}
+\label{fig:arms}
+\end{figure}
+
+\textbf{Hypothesis}
+
+\vspace{0.2cm}
+
+I expect that reversing the scale will have the causal effect of improving ratings. I theorize two mechanisms supporting my hypothesis. First, raters may satisfice and stop looking down the rating options when they first locate a rating which seems acceptable. Second, the first rating proposed as an option in the forms may anchor the final rating selected by raters. Thus, I predict that I will find a positive average treatment effect of reversing the 0 to 10 scale on the painting's ratings.
+
+\vspace{0.7cm}
+
+\textbf{Key Assumptions}
+
+\vspace{0.2cm}
+
+Experimental designs rely on the key assumptions of random assignment, excludability, non-interference, compliance, and non-attrition. Below, I briefly explain how my experimental design alleviates concerns of violation for each of these in turn.
+
+\vspace{0.2cm}
+
+\textit{Random assignment.} I assign raters to the two arms using simple randomization. The tool \textit{allocate.monster} is specifically designed to redirect respondents to different online forms from a common link. Further, I will assess covariate balance (i.e., age, gender, device, and frequency of museum visits) between the control and treatment groups by regressing the treatment status on the covariates, computing the F-statistic, and comparing it to the sampling distribution under the null hypothesis of simple random assignment. I will also graph covariate distributions across groups. Note that all covariates are collected \textit{before} exposure to the rating scales.
+
+\vspace{0.2cm}
+
+\textit{Excludability.} Excludability is unlikely to be violated under this design. The forms are identical with the exception of the rating scales and raters are blinded to their assignment such that all causal effects will stem directly from the treatment itself.
+
+\vspace{0.2cm}
+
+\textit{Non-interference.} Non-interference is a minimal concern. In theory, interference may occur if raters discuss their assessment of the painting and influence others' ratings. However, simple randomization makes exposure to such interactions balanced in expectation between the control and treatment groups. Furthermore, there is no plausible pathway for raters in these two groups to respond differently to such exposures. Additionally, the treatment exposure and the outcome measurement occur simultaneously, leaving little practical opportunity for interference.
+
+\newpage
+
+\textit{Compliance.} Non-compliance is highly unlikely in the experimental design because the tool \textit{allocate.monster} directly randomizes which raters are allocated to which scale and because raters have no existing way to find the other version of the form than the one to which they are assigned.
+
+\vspace{0.2cm}
+
+\textit{Non-attrition.} Differential attrition is a minimal concern. The two versions of the forms are identical (with the exception of the rating scales). Accordingly, there seemingly exists no plausible theoretical reason to expect that raters quitting before rating the painting would differ in expectation between the control and treatment groups.
+
+\vspace{0.7cm}
+
+\textbf{Approach to the analysis}
+
+\vspace{0.2cm}
+
+\textit{Treatment of variables.} I will collect four covariates: gender, age, device (i.e., computer or cellphone), and frequency of museum visits (i.e., never, occasionally, frequently, and very often). The two demographic covariates will be useful for balance checks. Museum visits and device will also be used for balance checks, but they may also be prognostic of the outcome. It may be that the size of the screen on which the painting is displayed, for example, predicts ratings. Raters' affinity for musea may also be prognostic of ratings. I will treat age and frequency of museum visits as quantitative regressors (lines 10-15) while I will deploy gender and device as categorical variables. 
+
+\vspace{0.2cm}
+
+\textit{Estimand and estimators.} The estimand is the average treatment effect of reversing the 0 to 10 scale on individual ratings. My primary estimation method is the difference-in-means estimator (248-251) while my secondary estimator is an adjusted regression (281-301). I will report the latter but interpret it as the subsidiary approach because I anticipate a limited sample size and hold weak priors on the prognostic strength of the covariates. I will select covariates which are predictive of ratings using LASSO (260-279). For the difference-in-means estimator, I compute the standard error manually using the Neyman estimator (253-258). For the adjusted regression model, I use robust standard errors (303).
+
+\vspace{0.2cm}
+
+\textit{Balance checks.} Balance checks are crucial for my experimental design because I do not directly control random assignment, instead relying on \textit{allocate.monster} to redirect raters to the two versions of the form. First, I will graph covariate distributions for the two experimental conditions and report means (96-216). Second, I assess balance through randomization inference (23-94). I regress treatment on all covariates and obtain the F-statistic. Then, I draw 100,000 possible random assignments under the null hypothesis that treatment status is distributed as a Bernoulli variable (i.e., $H_0: T_i \sim Bernoulli(0.5)$) and report the p-value from the resulting sampling distribution.
+
+\vspace{0.2cm}
+
+\textit{Confidence interval.} I will compute a 95\% confidence interval through randomization inference under the assumption of constant treatment effects (307-366). I reproduce the full simple random assignment process when re-randomizing. There are two potential issues with this approach. First, the assumption of constant treatment effects produces inexact confidence intervals. However, the resulting intervals are, in expectation and \textit{ceteris paribus}, conservative. Second, because I use simple randomization, it is unlikely that my final assignment will be balanced. Additionally, it is possible that the group with the higher variance in outcomes might also be the smaller of the two (370-374). In this case, this would drive the confidence interval to be anti-conservative in expectation. To account for this concern, I verify this relationship and also compute a classical confidence interval using the central limit theorem for comparison (376-377). 
+
+\vspace{0.2cm}
+
+\textit{Hypothesis testing.} I will assess my theoretical expectation using randomization inference (379-427). The sharp null hypothesis is that no rating is influenced by the treatment (i.e., $H_0: \tau_i=0 \; \forall i$). I use a one-sided test since my theory is that the reversed scale \textit{improves} ratings, based on anchoring and satisficing. Again, I reproduce the full simple random assignment process when re-randomizing.
+
+\vspace{0.7cm}
+
+\textbf{Code}
+
+```{r, echo=TRUE, eval=FALSE, attr.source='.numberLines'}
+### 0. LIBRARIES AND DATA----
+
+library(ggplot2)
+library(glmnet)
+library(sandwich)
+data <- read.csv("data.csv")
+
+### 1. DATA TRANSFORMATION----
+
+data$museum <- match(data$museum, c(
+  "Never",
+  "Occasionally",
+  "Frequently",
+  "Very often"
+))
+
+n_c <- sum(data$treatment == 0 & !is.na(data$rating))
+n_t <- sum(data$treatment == 1 & !is.na(data$rating))
+n_total <- n_c + n_t
+
+### 2. BALANCE CHECKS----
+
+# Randomization inference on F-statistic----
+
+##### computing the F-statistic
+
+treat_cov <- lm(treatment ~ age + factor(gender) + factor(device) + museum,
+            data = data)
+
+f_stat <- unname(summary(treat_cov)$fstatistic[1])
+
+##### sampling distribution from 100,000 draws
+
+X <- model.matrix(treat_cov)
+
+n <- nrow(X)
+df1 <- qr(X)$rank - 1
+df2 <- n - df1 - 1
+
+set.seed(123)
+
+treat_cov_ri <- numeric(100000)
+
+for (i in seq(1, 100000, by = 1000)) {
+  
+  Y <- matrix(rbinom(n * 1000, 1, 0.5), nrow = n)
+  
+  fit <- lm.fit(X, Y)
+  
+  rss <- colSums(fit$residuals^2)
+  tss <- colSums(sweep(Y, 2, colMeans(Y), "-")^2)
+  
+  treat_cov_ri[i:(i + 999)] <-
+    ((tss - rss) / df1) / (rss / df2)
+}
+
+##### computing the p_value and graphing
+
+p_treat_cov <- mean(treat_cov_ri >= f_stat)
+
+balance_plot <- ggplot(data.frame(F = treat_cov_ri), aes(x = F)) +
+  geom_histogram(
+    aes(fill = after_stat(ifelse(x >= f_stat, "Right", "Left"))),
+    bins = 80,
+    color = "white"
+  ) +
+  scale_fill_manual(
+    values = c("Left" = "gray70", "Right" = "gray90"),
+    guide = "none"
+  ) +
+  geom_vline(xintercept = f_stat,
+             color = "darkblue", linewidth = 1) +
+  labs(
+    x = NULL,
+    y = NULL
+  ) +
+  scale_x_continuous(
+    limits = c(0, 4),
+    expand = expansion(mult = c(0, 0))
+  ) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA,
+                                linewidth = 0.5),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+balance_plot
+
+# Distribution comparisons for covariates----
+
+##### age
+
+age_plot <- ggplot(data, aes(x = age)) +
+  geom_histogram(bins = 30, fill = "gray70",
+                 color = "white") +
+  facet_wrap(~ treatment, nrow = 1,
+             labeller = as_labeller(c(
+               "0" = "Control",
+               "1" = "Treatment"
+             ))) +
+  labs(x = NULL, y = NULL) +
+  scale_x_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA,
+                                linewidth = 0.5),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "italic"),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+age_c <- mean(data$age[data$treatment == 0], na.rm = TRUE)
+age_t <- mean(data$age[data$treatment == 1], na.rm = TRUE)
+
+##### gender
+
+gender_plot <- ggplot(data, aes(x = factor(gender,
+  levels = c("Non-binary", "Woman", "Man", "Prefer not to say")))) +
+  geom_bar(fill = "gray70", color = "white") +
+  facet_wrap(~ treatment, nrow = 1,
+             labeller = as_labeller(c(
+               "0" = "Control",
+               "1" = "Treatment"
+             ))) +
+  labs(x = NULL, y = NULL) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA,
+                                linewidth = 0.5),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "italic"),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+woman_c <- mean(data$gender[data$treatment == 0] == "Woman", na.rm = TRUE) * 100
+woman_t <- mean(data$gender[data$treatment == 1] == "Woman", na.rm = TRUE) * 100
+
+##### device
+
+device_plot <- ggplot(data, aes(x = factor(device))) +
+  geom_bar(fill = "gray70", color = "white") +
+  facet_wrap(~ treatment, nrow = 1,
+             labeller = as_labeller(c(
+               "0" = "Control",
+               "1" = "Treatment"
+             ))) +
+  labs(x = NULL, y = NULL) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA,
+                                linewidth = 0.5),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "italic"),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+cell_c <- mean(data$device[data$treatment == 0] == "Cellphone", na.rm = TRUE) * 100
+cell_t <- mean(data$device[data$treatment == 1] == "Cellphone", na.rm = TRUE) * 100
+
+##### museum visits
+
+museum_plot <- ggplot(data, aes(x = factor(museum,
+    levels = c(1, 2, 3, 4),
+    labels = c("Never", "Occasionally", "Frequently", "Very often")))) +
+  geom_bar(fill = "gray70", color = "white") +
+  facet_wrap(~ treatment, nrow = 1,
+             labeller = as_labeller(c(
+               "0" = "Control",
+               "1" = "Treatment"
+             ))) +
+  labs(x = NULL, y = NULL) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA,
+                                linewidth = 0.5),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "italic"),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+museum_c <- mean(data$museum[data$treatment == 0] %in% c(3, 4), na.rm = TRUE) * 100
+museum_t <- mean(data$museum[data$treatment == 1] %in% c(3, 4), na.rm = TRUE) * 100
+
+# 3. MAIN ANALYSIS----
+
+# Graphing the distributions of outcomes----
+
+rating_plot <- ggplot(data, aes(x = factor(rating, levels = 0:10))) +
+  geom_bar(fill = "gray70", color = "white") +
+  facet_wrap(~ treatment, nrow = 1,
+             labeller = as_labeller(c(
+               "0" = "Control",
+               "1" = "Treatment"
+             ))) +
+  labs(x = NULL, y = NULL) +
+  scale_x_discrete(drop = FALSE) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA,
+                                linewidth = 0.5),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "italic"),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+# ATEs and standard errors----
+
+##### simple DiM
+
+ATE_DiM <- mean(data$rating[data$treatment == 1], na.rm = TRUE) -
+  mean(data$rating[data$treatment == 0], na.rm = TRUE)
+
+se_DiM <- sqrt(
+  var(data$rating[data$treatment == 1], na.rm = TRUE) /
+    sum(!is.na(data$rating[data$treatment == 1])) +
+    var(data$rating[data$treatment == 0], na.rm = TRUE) /
+    sum(!is.na(data$rating[data$treatment == 0]))
+)
+
+##### LASSO covariate selection
+
+reg_data <- na.omit(data[, c("rating", "treatment", "age",
+                             "gender", "device", "museum")])
+
+X <- model.matrix(
+  ~ treatment + age + factor(gender) + factor(device) + museum,
+  data = reg_data
+)[, -1]
+
+penalty <- ifelse(colnames(X) == "treatment", 0, 1)
+
+set.seed(123)
+
+lasso <- cv.glmnet(
+  X, reg_data$rating,
+  alpha = 1,
+  nfolds = 10,
+  penalty.factor = penalty
+)
+
+##### regression with covariate adjustment
+
+selected <- rownames(coef(lasso, s = "lambda.1se"))[
+  as.vector(coef(lasso, s = "lambda.1se")) != 0
+]
+
+selected_cov <- c(
+  if ("age" %in% selected) "age",
+  if (any(startsWith(selected, "factor(gender)"))) "factor(gender)",
+  if (any(startsWith(selected, "factor(device)"))) "factor(device)",
+  if ("museum" %in% selected) "museum"
+)
+
+model_formula <- reformulate(
+  c("treatment", selected_cov),
+  response = "rating"
+)
+
+adjusted_model <- lm(model_formula, data = data)
+
+ATE_adj <- coef(summary(adjusted_model))["treatment", "Estimate"]
+
+se_adj <- sqrt(vcovHC(adjusted_model, type = "HC2")["treatment", "treatment"])
+
+# Confidence interval----
+
+data_ci <- data.frame(
+  rating_c = ifelse(data$treatment == 0,
+                    data$rating,
+                    data$rating - ATE_DiM),
+  
+  rating_t = ifelse(data$treatment == 1,
+                    data$rating,
+                    data$rating + ATE_DiM)
+)
+
+set.seed(123)
+
+ci_ri <- replicate(100000, {
+  data_ci$treatment_random <- rbinom(nrow(data_ci), 1, 0.5)
+  
+  mean(data_ci$rating_t[data_ci$treatment_random == 1]) -
+    mean(data_ci$rating_c[data_ci$treatment_random == 0])
+})
+
+ci_lower <- quantile(ci_ri, 0.025)
+ci_upper <- quantile(ci_ri, 0.975)
+
+xmax <- max(abs(ci_ri), na.rm = TRUE) * 1.05
+
+ci_plot <- ggplot(data.frame(ATE = ci_ri), aes(x = ATE)) +
+  geom_histogram(
+    aes(fill = after_stat(ifelse(
+      x < ci_lower | x > ci_upper, "Outside", "Inside"
+    ))),
+    bins = 80, color = "white"
+  ) +
+  scale_fill_manual(
+    values = c("Inside" = "gray70", "Outside" = "gray90"),
+    guide = "none"
+  ) +
+  geom_vline(xintercept = ATE_DiM,
+             color = "darkblue", linewidth = 1) +
+  geom_vline(xintercept = c(ci_lower, ci_upper),
+             color = "black", linetype = "dashed",
+             linewidth = 0.7) +
+  labs(x = NULL, y = NULL) +
+  scale_x_continuous(
+    limits = c(-xmax, xmax),
+    expand = expansion(mult = c(0, 0))
+  ) +
+  geom_vline(xintercept = 0, color = "black", linewidth = 0.5) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA,
+                                linewidth = 0.5),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+ci_plot
+
+##### classical confidence interval
+
+var_c <- var(data$rating[data$treatment == 0])
+var_t <- var(data$rating[data$treatment == 1])
+
+smaller_higher_variance <- (n_c < n_t & var_c > var_t) |
+                           (n_t < n_c & var_t > var_c)
+
+ci_neyman_lower <- ATE_DiM - 1.96 * se_DiM
+ci_neyman_upper <- ATE_DiM + 1.96 * se_DiM
+
+# Randomization inference----
+
+set.seed(123)
+
+ri_DiM <- replicate(100000, {
+  treatment_random <- rbinom(nrow(data), 1, 0.5)
+  
+  mean(data$rating[treatment_random == 1]) -
+    mean(data$rating[treatment_random == 0])
+})
+
+p_DiM <- mean(ri_DiM >= ATE_DiM)
+
+xmax_ri <- max(abs(c(ri_DiM, ATE_DiM)), na.rm = TRUE) * 1.05
+
+ri_plot <- ggplot(data.frame(ATE = ri_DiM), aes(x = ATE)) +
+  geom_histogram(
+    aes(fill = after_stat(ifelse(
+      x >= ATE_DiM, "Right", "Left"
+    ))),
+    bins = 80, color = "white"
+  ) +
+  scale_fill_manual(
+    values = c("Left" = "gray70", "Right" = "gray90"),
+    guide = "none"
+  ) +
+  geom_vline(xintercept = 0,
+             color = "black", linewidth = 0.5) +
+  geom_vline(xintercept = ATE_DiM,
+             color = "darkblue", linewidth = 1) +
+  labs(x = NULL, y = NULL) +
+  scale_x_continuous(
+    limits = c(-xmax_ri, xmax_ri),
+    expand = expansion(mult = c(0, 0))
+  ) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA,
+                                linewidth = 0.5),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+ri_plot
+
+### 4. EXTRA GRAPHING----
+
+mean_c <- mean(data$rating[data$treatment == 0], na.rm = TRUE)
+mean_t <- mean(data$rating[data$treatment == 1], na.rm = TRUE)
+
+rating_c <- data$rating[data$treatment == 0]
+rating_t <- data$rating[data$treatment == 1]
+
+ci_mean_c <- mean_c + c(-1, 1) *
+  qt(0.975, length(rating_c) - 1) *
+  sd(rating_c) / sqrt(length(rating_c))
+
+ci_mean_t <- mean_t + c(-1, 1) *
+  qt(0.975, length(rating_t) - 1) *
+  sd(rating_t) / sqrt(length(rating_t))
+
+plot_data <- data[!is.na(data$rating) &
+                    !is.na(data$museum) &
+                    data$treatment %in% c(0, 1), ]
+
+plot_data <- plot_data[order(
+  plot_data$treatment, plot_data$rating, plot_data$museum
+), ]
+
+plot_data$group_x <- ifelse(plot_data$treatment == 0, 1, 2)
+
+plot_data$dot_n <- ave(
+  plot_data$rating, plot_data$treatment, plot_data$rating,
+  FUN = length
+)
+
+plot_data$dot_i <- ave(
+  plot_data$rating, plot_data$treatment, plot_data$rating,
+  FUN = seq_along
+)
+
+plot_data$x_dot <- plot_data$group_x +
+  (plot_data$dot_i - (plot_data$dot_n + 1) / 2) *
+  pmin(0.07, 0.65 / pmax(plot_data$dot_n - 1, 1))
+
+effect_plot <- ggplot(plot_data, aes(x = x_dot, y = rating)) +
+  annotate("rect",
+           xmin = 0.55, xmax = 1.5,
+           ymin = ci_mean_c[1], ymax = ci_mean_c[2],
+           fill = "#DCEAF5", alpha = 0.65) +
+  
+  annotate("rect",
+           xmin = 1.5, xmax = 2.45,
+           ymin = ci_mean_t[1], ymax = ci_mean_t[2],
+           fill = "#DCEAF5", alpha = 0.65) +
+  geom_point(
+    aes(color = factor(museum)),
+    size = 2.2, alpha = 0.95
+  ) +
+  scale_color_manual(
+    values = c(
+      "1" = "#7FB3E6",
+      "2" = "#3D84C6",
+      "3" = "#145DA0",
+      "4" = "#082B59"
+    ),
+    breaks = c("1", "2", "3", "4"),
+    labels = c("Never", "Occasionally",
+               "Frequently", "Very often"),
+    name = "Museum visits"
+  ) +
+  annotate("segment",
+           x = 0.55, xend = 1.5,
+           y = mean_c, yend = mean_c,
+           color = "black", linewidth = 1.1,
+           linetype = "dashed") +
+  annotate("segment",
+           x = 1.5, xend = 2.45,
+           y = mean_t, yend = mean_t,
+           color = "black", linewidth = 1.1,
+           linetype = "dashed") +
+  scale_x_continuous(
+    breaks = c(1, 2),
+    labels = c("Control", "Treatment")
+  ) +
+  scale_y_continuous(
+    breaks = 0:10,
+    expand = expansion(mult = c(0.02, 0.02))
+  ) +
+  coord_cartesian(
+    xlim = c(0.55, 2.45),
+    ylim = c(0, 10)
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(
+      color = "black", fill = NA, linewidth = 0.5
+    ),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    legend.position = "bottom",
+    plot.background = element_rect(
+      fill = "white", color = NA
+    )
+  )
+
+effect_plot
+```
