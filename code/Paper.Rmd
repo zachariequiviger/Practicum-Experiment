@@ -1,0 +1,765 @@
+---
+output:
+  pdf_document:
+    latex_engine: pdflatex
+  word_document: default
+fontsize: 11pt
+geometry: margin=1in
+header-includes:
+- \usepackage{lmodern}
+- \usepackage{graphicx}
+- \usepackage{float}
+- \usepackage{wrapfig}
+- \usepackage{longtable}
+- \usepackage{caption}
+- \usepackage{booktabs}
+- \usepackage{titlesec}
+- \setlength{\parskip}{0pt}
+- \setlength{\parindent}{0pt}
+- \titlespacing*{\section}{0pt}{1.5ex}{0.7ex}
+- \titlespacing*{\subsection}{0pt}{1ex}{0.4ex}
+urlcolor: blue
+linkcolor: blue
+---
+
+```{r code, echo=FALSE, warning=FALSE, message=FALSE, included=FALSE}
+### 0. LIBRARIES AND DATA----
+
+library(ggplot2)
+library(glmnet)
+library(sandwich)
+data <- read.csv("data/data.csv")
+
+### 1. DATA TRANSFORMATION----
+
+data$museum <- match(data$museum, c(
+  "Never",
+  "Occasionally",
+  "Frequently",
+  "Very often"
+))
+
+n_c <- sum(data$treatment == 0 & !is.na(data$rating))
+n_t <- sum(data$treatment == 1 & !is.na(data$rating))
+n_total <- n_c + n_t
+
+### 2. BALANCE CHECKS----
+
+# Randomization inference on F-statistic----
+
+##### computing the F-statistic
+
+treat_cov <- lm(treatment ~ age + factor(gender) + factor(device) + museum,
+            data = data)
+
+f_stat <- unname(summary(treat_cov)$fstatistic[1])
+
+##### sampling distribution from 100,000 draws
+
+X <- model.matrix(treat_cov)
+
+n <- nrow(X)
+df1 <- qr(X)$rank - 1
+df2 <- n - df1 - 1
+
+set.seed(123)
+
+treat_cov_ri <- numeric(100000)
+
+for (i in seq(1, 100000, by = 1000)) {
+  
+  Y <- matrix(rbinom(n * 1000, 1, 0.5), nrow = n)
+  
+  fit <- lm.fit(X, Y)
+  
+  rss <- colSums(fit$residuals^2)
+  tss <- colSums(sweep(Y, 2, colMeans(Y), "-")^2)
+  
+  treat_cov_ri[i:(i + 999)] <-
+    ((tss - rss) / df1) / (rss / df2)
+}
+
+##### computing the p_value and graphing
+
+p_treat_cov <- mean(treat_cov_ri >= f_stat)
+
+balance_plot <- ggplot(data.frame(F = treat_cov_ri), aes(x = F)) +
+  geom_histogram(
+    aes(fill = after_stat(ifelse(x >= f_stat, "Right", "Left"))),
+    bins = 80,
+    color = "white"
+  ) +
+  scale_fill_manual(
+    values = c("Left" = "gray70", "Right" = "gray85"),
+    guide = "none"
+  ) +
+  geom_vline(xintercept = f_stat,
+             color = "darkblue", linewidth = 1) +
+  labs(
+    x = NULL,
+    y = NULL
+  ) +
+  scale_x_continuous(
+    limits = c(0, 4),
+    expand = expansion(mult = c(0, 0))
+  ) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA,
+                                linewidth = 0.5),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+# Distribution comparisons for covariates----
+
+##### age
+
+age_plot <- ggplot(data, aes(x = age)) +
+  geom_histogram(bins = 30, fill = "gray70",
+                 color = "white") +
+  facet_wrap(~ treatment, nrow = 1,
+             labeller = as_labeller(c(
+               "0" = "Control",
+               "1" = "Treatment"
+             ))) +
+  labs(x = NULL, y = NULL) +
+  scale_x_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA,
+                                linewidth = 0.5),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "italic"),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+age_c <- mean(data$age[data$treatment == 0], na.rm = TRUE)
+age_t <- mean(data$age[data$treatment == 1], na.rm = TRUE)
+
+##### gender
+
+gender_plot <- ggplot(data, aes(x = factor(gender,
+  levels = c("Non-binary", "Woman", "Man", "Prefer not to say")))) +
+  geom_bar(fill = "gray70", color = "white") +
+  facet_wrap(~ treatment, nrow = 1,
+             labeller = as_labeller(c(
+               "0" = "Control",
+               "1" = "Treatment"
+             ))) +
+  labs(x = NULL, y = NULL) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA,
+                                linewidth = 0.5),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "italic"),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+woman_c <- mean(data$gender[data$treatment == 0] == "Woman", na.rm = TRUE) * 100
+woman_t <- mean(data$gender[data$treatment == 1] == "Woman", na.rm = TRUE) * 100
+
+##### device
+
+device_plot <- ggplot(data, aes(x = factor(device))) +
+  geom_bar(fill = "gray70", color = "white") +
+  facet_wrap(~ treatment, nrow = 1,
+             labeller = as_labeller(c(
+               "0" = "Control",
+               "1" = "Treatment"
+             ))) +
+  labs(x = NULL, y = NULL) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA,
+                                linewidth = 0.5),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "italic"),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+cell_c <- mean(data$device[data$treatment == 0] == "Cellphone", na.rm = TRUE) * 100
+cell_t <- mean(data$device[data$treatment == 1] == "Cellphone", na.rm = TRUE) * 100
+
+##### museum visits
+
+museum_plot <- ggplot(data, aes(x = factor(museum,
+    levels = c(1, 2, 3, 4),
+    labels = c("Never", "Occasionally", "Frequently", "Very often")))) +
+  geom_bar(fill = "gray70", color = "white") +
+  facet_wrap(~ treatment, nrow = 1,
+             labeller = as_labeller(c(
+               "0" = "Control",
+               "1" = "Treatment"
+             ))) +
+  labs(x = NULL, y = NULL) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA,
+                                linewidth = 0.5),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "italic"),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+museum_c <- mean(data$museum[data$treatment == 0] %in% c(3, 4), na.rm = TRUE) * 100
+museum_t <- mean(data$museum[data$treatment == 1] %in% c(3, 4), na.rm = TRUE) * 100
+
+# 3. MAIN ANALYSIS----
+
+# Graphing the distributions of outcomes----
+
+rating_plot <- ggplot(data, aes(x = factor(rating, levels = 0:10))) +
+  geom_bar(fill = "gray70", color = "white") +
+  facet_wrap(~ treatment, nrow = 1,
+             labeller = as_labeller(c(
+               "0" = "Control",
+               "1" = "Treatment"
+             ))) +
+  labs(x = NULL, y = NULL) +
+  scale_x_discrete(drop = FALSE) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA,
+                                linewidth = 0.5),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "italic"),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+# ATEs and standard errors----
+
+##### simple DiM
+
+ATE_DiM <- mean(data$rating[data$treatment == 1], na.rm = TRUE) -
+  mean(data$rating[data$treatment == 0], na.rm = TRUE)
+
+se_DiM <- sqrt(
+  var(data$rating[data$treatment == 1], na.rm = TRUE) /
+    sum(!is.na(data$rating[data$treatment == 1])) +
+    var(data$rating[data$treatment == 0], na.rm = TRUE) /
+    sum(!is.na(data$rating[data$treatment == 0]))
+)
+
+##### LASSO covariate selection
+
+reg_data <- na.omit(data[, c("rating", "treatment", "age",
+                             "gender", "device", "museum")])
+
+X <- model.matrix(
+  ~ treatment + age + factor(gender) + factor(device) + museum,
+  data = reg_data
+)[, -1]
+
+penalty <- ifelse(colnames(X) == "treatment", 0, 1)
+
+set.seed(123)
+
+lasso <- cv.glmnet(
+  X, reg_data$rating,
+  alpha = 1,
+  nfolds = 10,
+  penalty.factor = penalty
+)
+
+##### regression with covariate adjustment
+
+selected <- rownames(coef(lasso, s = "lambda.1se"))[
+  as.vector(coef(lasso, s = "lambda.1se")) != 0
+]
+
+selected_cov <- c(
+  if ("age" %in% selected) "age",
+  if (any(startsWith(selected, "factor(gender)"))) "factor(gender)",
+  if (any(startsWith(selected, "factor(device)"))) "factor(device)",
+  if ("museum" %in% selected) "museum"
+)
+
+model_formula <- reformulate(
+  c("treatment", selected_cov),
+  response = "rating"
+)
+
+adjusted_model <- lm(model_formula, data = data)
+
+ATE_adj <- coef(summary(adjusted_model))["treatment", "Estimate"]
+
+se_adj <- sqrt(vcovHC(adjusted_model, type = "HC2")["treatment", "treatment"])
+
+# Confidence interval----
+
+data_ci <- data.frame(
+  rating_c = ifelse(data$treatment == 0,
+                    data$rating,
+                    data$rating - ATE_DiM),
+  
+  rating_t = ifelse(data$treatment == 1,
+                    data$rating,
+                    data$rating + ATE_DiM)
+)
+
+set.seed(123)
+
+ci_ri <- replicate(100000, {
+  data_ci$treatment_random <- rbinom(nrow(data_ci), 1, 0.5)
+  
+  mean(data_ci$rating_t[data_ci$treatment_random == 1]) -
+    mean(data_ci$rating_c[data_ci$treatment_random == 0])
+})
+
+ci_lower <- quantile(ci_ri, 0.025)
+ci_upper <- quantile(ci_ri, 0.975)
+
+xmax <- max(abs(ci_ri), na.rm = TRUE) * 1.05
+
+ci_plot <- ggplot(data.frame(ATE = ci_ri), aes(x = ATE)) +
+  geom_histogram(
+    aes(fill = after_stat(ifelse(
+      x < ci_lower | x > ci_upper, "Outside", "Inside"
+    ))),
+    bins = 80, color = "white"
+  ) +
+  scale_fill_manual(
+    values = c("Inside" = "gray70", "Outside" = "gray85"),
+    guide = "none"
+  ) +
+  geom_vline(xintercept = ATE_DiM,
+             color = "darkblue", linewidth = 1) +
+  geom_vline(xintercept = c(ci_lower, ci_upper),
+             color = "black", linetype = "dashed",
+             linewidth = 0.7) +
+  labs(x = NULL, y = NULL) +
+  scale_x_continuous(
+    limits = c(-xmax, xmax),
+    expand = expansion(mult = c(0, 0))
+  ) +
+  geom_vline(xintercept = 0, color = "black", linewidth = 0.5) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA,
+                                linewidth = 0.5),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+##### classical confidence interval
+
+var_c <- var(data$rating[data$treatment == 0])
+var_t <- var(data$rating[data$treatment == 1])
+
+smaller_higher_variance <- (n_c < n_t & var_c > var_t) |
+                           (n_t < n_c & var_t > var_c)
+
+ci_neyman_lower <- ATE_DiM - 1.96 * se_DiM
+ci_neyman_upper <- ATE_DiM + 1.96 * se_DiM
+
+# Randomization inference----
+
+set.seed(123)
+
+ri_DiM <- replicate(100000, {
+  treatment_random <- rbinom(nrow(data), 1, 0.5)
+  
+  mean(data$rating[treatment_random == 1]) -
+    mean(data$rating[treatment_random == 0])
+})
+
+p_DiM <- mean(ri_DiM >= ATE_DiM)
+
+xmax_ri <- max(abs(c(ri_DiM, ATE_DiM)), na.rm = TRUE) * 1.05
+
+ri_plot <- ggplot(data.frame(ATE = ri_DiM), aes(x = ATE)) +
+  geom_histogram(
+    aes(fill = after_stat(ifelse(
+      x >= ATE_DiM, "Right", "Left"
+    ))),
+    bins = 80, color = "white"
+  ) +
+  scale_fill_manual(
+    values = c("Left" = "gray70", "Right" = "gray85"),
+    guide = "none"
+  ) +
+  geom_vline(xintercept = 0,
+             color = "black", linewidth = 0.5) +
+  geom_vline(xintercept = ATE_DiM,
+             color = "darkblue", linewidth = 1) +
+  labs(x = NULL, y = NULL) +
+  scale_x_continuous(
+    limits = c(-xmax_ri, xmax_ri),
+    expand = expansion(mult = c(0, 0))
+  ) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.03))
+  ) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA,
+                                linewidth = 0.5),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+### 4. EXTRA GRAPHING----
+
+mean_c <- mean(data$rating[data$treatment == 0], na.rm = TRUE)
+mean_t <- mean(data$rating[data$treatment == 1], na.rm = TRUE)
+
+rating_c <- data$rating[data$treatment == 0]
+rating_t <- data$rating[data$treatment == 1]
+
+ci_mean_c <- mean_c + c(-1, 1) *
+  qt(0.975, length(rating_c) - 1) *
+  sd(rating_c) / sqrt(length(rating_c))
+
+ci_mean_t <- mean_t + c(-1, 1) *
+  qt(0.975, length(rating_t) - 1) *
+  sd(rating_t) / sqrt(length(rating_t))
+
+plot_data <- data[!is.na(data$rating) &
+                    !is.na(data$museum) &
+                    data$treatment %in% c(0, 1), ]
+
+plot_data <- plot_data[order(
+  plot_data$treatment, plot_data$rating, plot_data$museum
+), ]
+
+plot_data$group_x <- ifelse(plot_data$treatment == 0, 1, 2)
+
+plot_data$dot_n <- ave(
+  plot_data$rating, plot_data$treatment, plot_data$rating,
+  FUN = length
+)
+
+plot_data$dot_i <- ave(
+  plot_data$rating, plot_data$treatment, plot_data$rating,
+  FUN = seq_along
+)
+
+plot_data$x_dot <- plot_data$group_x +
+  (plot_data$dot_i - (plot_data$dot_n + 1) / 2) *
+  pmin(0.07, 0.65 / pmax(plot_data$dot_n - 1, 1))
+
+effect_plot <- ggplot(plot_data, aes(x = x_dot, y = rating)) +
+  annotate("rect",
+           xmin = 0.55, xmax = 1.5,
+           ymin = ci_mean_c[1], ymax = ci_mean_c[2],
+           fill = "#DCEAF5", alpha = 0.65) +
+  
+  annotate("rect",
+           xmin = 1.5, xmax = 2.45,
+           ymin = ci_mean_t[1], ymax = ci_mean_t[2],
+           fill = "#DCEAF5", alpha = 0.65) +
+  geom_point(
+    aes(color = factor(museum)),
+    size = 2.2, alpha = 0.95
+  ) +
+  scale_color_manual(
+    values = c(
+      "1" = "#7FB3E6",
+      "2" = "#3D84C6",
+      "3" = "#145DA0",
+      "4" = "#082B59"
+    ),
+    breaks = c("1", "2", "3", "4"),
+    labels = c("Never", "Occasionally",
+               "Frequently", "Very often"),
+    name = "Museum visits"
+  ) +
+  annotate("segment",
+           x = 0.55, xend = 1.5,
+           y = mean_c, yend = mean_c,
+           color = "black", linewidth = 1.1,
+           linetype = "dashed") +
+  annotate("segment",
+           x = 1.5, xend = 2.45,
+           y = mean_t, yend = mean_t,
+           color = "black", linewidth = 1.1,
+           linetype = "dashed") +
+  scale_x_continuous(
+    breaks = c(1, 2),
+    labels = c("Control", "Treatment")
+  ) +
+  scale_y_continuous(
+    breaks = 0:10,
+    expand = expansion(mult = c(0.02, 0.02))
+  ) +
+  coord_cartesian(
+    xlim = c(0.55, 2.45),
+    ylim = c(0, 10)
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(
+      color = "black", fill = NA, linewidth = 0.5
+    ),
+    panel.grid = element_blank(),
+    axis.line = element_blank(),
+    legend.position = "bottom",
+    plot.background = element_rect(
+      fill = "white", color = NA
+    )
+  )
+
+```
+
+\begin{center}
+{\LARGE\bfseries Are Rating Scales Reversible?\par}
+\vspace{0.2cm}
+{\itshape Zacharie Quiviger\par}
+\vspace{0.02cm}
+{November 15, 2026\par}
+\end{center}
+
+\vspace{0.1cm}
+
+Scholars and political commentators often compare and combine results from multiple survey instruments. Such instruments may, however, differ meaningfully, raising the possibility of incomparability and bias. For example, similar questions may be asked by different survey providers or survey questions may need to be modified for local comprehension in cross-country research, forcing imperfect aggregation. In this paper, I investigate whether even a marginal modification in a survey instrument can yield systematically different results. Specifically, I show that reversing a 0 to 10 rating scale to 10 to 0 increases individual ratings for an artwork common to both experimental conditions in the design. I attribute this finding to anchoring and satisficing on the part of raters.
+
+\vspace{0.4cm}
+
+\textbf{Experimental design}
+
+\vspace{0.2cm}
+
+I deliberately designed my intervention to be minimal because I was interested in showing that even a seemingly inconsequential difference between survey instruments may result in incomparable data. I recruited 180 raters via social media for assistance in assessing a single painting, \textit{Baigneurs à Saint-Tropez} by pointillist artist Maximilien Luce. I thus used a convenience sample and do not claim that the collected ratings are representative of the broader population of ratings. All raters were assigned by simple randomization to the control group—which rated the painting on a cardinal scale from 0 to 10---and the treatment group—which rated the painting on a cardinal scale from 10 to 0 (see Figure \ref{fig:experiment}). The final sample size was $N=`r round(n_total, 0)`$ with `r round(n_c, 0)` ratings in the control group and `r round(n_t, 0)` ratings in the treatment group. Simple random assignment was conducted using \textit{allocate.monster}. This tool redirected raters randomly between two Google Forms surveys from a common link. The two forms were perfectly identical with the sole exception of the reversed scale. 
+
+\begin{figure}[H]
+\centering
+
+\begin{minipage}[c]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=6cm,keepaspectratio]{figures/painting.jpg}
+
+    \small (a) Painting
+\end{minipage}
+\hfill
+\begin{minipage}[c]{0.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth,height=6cm,keepaspectratio]{figures/arms.jpg}
+
+    \small (b) Experimental conditions
+\end{minipage}
+
+\caption{\textit{Artwork (left) rated in the two experimental conditions (right).}}
+\label{fig:experiment}
+
+\vspace{-0.15cm}
+
+\end{figure}
+
+Because I did not directly control the simple random assignment, I collected covariates (i.e., gender, age, device used, and frequency of museum visits) and conducted extensive balance checks. First, I computed a sampling distribution for the F-statistic from the regression of treatment status on all covariates using randomization inference under the null hypothesis that the assignment was completed under simple randomization. This method yields a p-value of `r round(p_treat_cov, 2)`. Second, I present distributional comparisons for all covariates across conditions in Figure \ref{fig:balance-figure}. These checks reveal no evidence of systematic imbalance.
+
+```{r balance-figure, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6.5, fig.height=8.3, fig.align='center', fig.pos='p', fig.cap="\\textit{Covariate balance between control and treatment groups.}"}
+
+library(ggplot2)
+library(patchwork)
+
+balance_figure <- wrap_plots(
+  age_plot +
+    labs(caption = "a) Balance in age"),
+
+  gender_plot +
+    labs(caption = "b) Balance in gender"),
+
+  device_plot +
+    labs(caption = "c) Balance in device used"),
+
+  museum_plot +
+    labs(caption = "d) Balance in frequency of museum visits"),
+
+  ncol = 1
+)
+
+balance_figure & theme(
+  plot.caption = element_text(hjust = 0.5, size = 9)
+)
+```
+
+Beyond random assignment, the design satisfies the core assumptions for unbiased estimation. Excludability likely held because the two versions of the survey were identical, with the exception of the intervention, and because raters remained blind to experimental assignments when providing assistance to the experiment. Interference is of minimal concern, although raters could plausibly have discussed ratings. Simple randomization ensured that exposure to such interactions remained balanced in expectation between the control and treatment groups, and responses to these interactions plausibly would not have differed between the two conditions. The simultaneity of treatment exposure and outcome collection further alleviated this concern. Noncompliance was highly unlikely since raters could only access the form to which their rating was assigned. Finally, any attrition (i.e., raters exiting their survey before completion) likely would not have differentially impacted the two groups, in expectation, since the intervention was minimal and the two forms were otherwise identical. For a more detailed discussion of these core assumptions, see the pre-analysis plan.
+
+\vspace{0.4cm}
+
+\textbf{Theory and hypothesis}
+
+\vspace{0.2cm}
+
+I expect the ratings provided under the reversed scale to be greater than the ratings provided under the control 0 to 10 scale. This hypothesis was [pre-registered](https://aspredicted.org/sd8gd2.pdf) (albeit after data collection had launched but prior to assessment) in the pre-analysis plan. First, respondents may have rated the painting through satisficing, opting for the first option presented to them that seemed satisfactory. Second, respondents may have been anchored by the first rating available to them. Both theoretical mechanisms predict that the treatment scale would lead to greater ratings on average than the control scale. Because my theoretical prediction is directional, I evaluate the evidence using a one-sided hypothesis test in the section below.
+
+\vspace{0.5cm}
+
+\textbf{Analysis and results}
+
+\vspace{0.2cm}
+
+The simple difference-in-means estimator yields an estimated average treatment effect of `r round(ATE_DiM, 2)`. The robust Neyman standard error is `r round(se_DiM, 2)`. LASSO did not select any covariates as predictive of ratings. Consequently, the preregistered adjusted regression 
+
+\begin{wrapfigure}{r}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/effect_plot.pdf}
+    \caption{\textit{Data and average treatment effect.}}
+    \label{fig:effect}
+\end{wrapfigure}
+
+estimator collapses to the simple difference-in-means estimator. Figure \ref{fig:effect} plots the data and the average ratings for the control and treatment groups. The difference between the average ratings is the estimated average treatment effect. I use a randomization-based approach to compute a two-sided 95\% confidence interval under the assumption of constant effects. The confidence interval is $[$`r round(ci_lower, 2)`, `r round(ci_upper, 2)`$]$. Because the treatment group is larger and has a lower variance (`r round(var_t, 1)`) than the control group (`r round(var_c, 1)`), the interval may have less than nominal coverage. However, the 95\% confidence interval computed using the central limit theorem is identical when rounded to two decimal places. To test the hypothesis, I use randomization inference under the sharp null of no individual effects of reversing the scale (i.e., $H_0: \tau_i=0 \; \forall i$). The one-sided p-value is `r round(p_DiM, 2)`. The test suggests rejection of the sharp null hypothesis at the 10\% level but not at the 5\% level.
+
+\captionsetup[figure]{textfont=it}
+
+```{r inference-figure, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7, fig.height=3, fig.align='center', fig.cap="Sampling distributions obtained through randomization-based approaches."}
+
+library(patchwork)
+
+p1 <- ci_plot +
+  labs(title = "a) Confidence interval under the\nassumption of constant treatment effects") +
+  theme(plot.title = element_text(hjust = 0.5, face = "italic", size = 9))
+
+p2 <- ri_plot +
+  labs(title = "b) Sampling distribution under the\nsharp null hypothesis of no effect") +
+  theme(plot.title = element_text(hjust = 0.5, face = "italic", size = 9))
+
+inference_figure <- p1 | p2
+
+print(inference_figure)
+```
+
+\vspace{0.5cm}
+
+\textbf{Discussion}
+
+\vspace{0.2cm}
+
+```{r results-table, echo=FALSE, results='asis', warning=FALSE, message=FALSE}
+
+library(knitr)
+
+results <- data.frame(
+  Statistic = c(
+    "Average treatment effect",
+    "Neyman standard error",
+    "95\\% confidence interval",
+    "One-sided Fisher p-value",
+    "Total observations",
+    "\\hspace{1em}Control group",
+    "\\hspace{1em}Treatment group"
+  ),
+  Value = c(
+    sprintf("%.2f", ATE_DiM),
+    sprintf("%.2f", se_DiM),
+    sprintf("[%.2f, %.2f]", as.numeric(ci_lower), as.numeric(ci_upper)),
+    sprintf("%.2f", p_DiM),
+    as.character(n_c + n_t),
+    as.character(n_c),
+    as.character(n_t)
+  )
+)
+
+cat("\\begin{wraptable}{r}{0.54\\textwidth}\n")
+cat("\\centering\n")
+cat("\\footnotesize\n")
+cat("\\renewcommand{\\arraystretch}{1.15}\n")
+cat("\\caption{\\textit{Main experimental results}}\n")
+cat("\\label{tab:main-results}\n")
+cat("\\vspace{0.3em}\n")
+
+cat(as.character(kable(
+  results,
+  format = "latex",
+  booktabs = TRUE,
+  linesep = "",
+  align = c("l", "r"),
+  row.names = FALSE,
+  col.names = c("Statistic", "Value"),
+  escape = FALSE
+)))
+
+cat("\n\\end{wraptable}\n")
+```
+
+My results show that reversing the rating scale from 0 to 10 to 10 to 0 increased the individual ratings of the painting moderately on average (i.e., by `r round(ATE_DiM, 2)` on a 10-point scale). The average treatment effect is distinguishable from the sharp null hypothesis of zero effect at the 10\% level. I interpret this result as consistent with raters satisficing or being anchored by the first rating offered to them. This argument is theoretically plausible, although my experiment does not offer causal evidence allowing for discrimination between mechanisms. Table \ref{tab:main-results} displays the main experimental results.
+
+\vspace{0.2cm}
+
+The intervention was minimal by design. Nonetheless, the experiment provides suggestive evidence that even marginal modifications to survey instruments can systematically affect responses. Thus, the findings highlight the potential pitfalls of aggregating survey results from instruments that are not identical. Scholars ought to exercise caution when designing surveys and combining data.
+
+\newpage
+
+\textbf{Appendix A: Replication data}
+
+\vspace{0.1cm}
+
+\captionsetup[table]{textfont=it}
+
+```{r appendix-data, echo=FALSE, results='asis', warning=FALSE, message=FALSE}
+library(knitr)
+
+appendix_data <- read.csv("data/data.csv")
+
+kable(
+  appendix_data[, c("treatment", "rating", "age",
+                    "gender", "device", "museum")],
+  format = "latex",
+  booktabs = TRUE,
+  longtable = TRUE,
+  linesep = "",
+  align = "llllll",
+  caption = "Rating-level experimental data",
+  escape = FALSE
+)
+```
+
+\newpage
+
+\textbf{Appendix B: Replication code}
+
+\begingroup
+\footnotesize
+
+```{r appendix-code, ref.label='code', eval=FALSE, echo=TRUE}
+```
+
+\endgroup
