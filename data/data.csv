@@ -1,0 +1,181 @@
+﻿treatment,age,gender,device,museum,rating
+0,24,Woman,Cellphone,Occasionally,8
+0,30,Man,Computer or laptop,Very often,5
+0,29,Woman,Cellphone,Occasionally,7
+0,28,Man,Cellphone,Occasionally,6
+0,26,Woman,Cellphone,Frequently,8
+0,29,Man,Cellphone,Occasionally,7
+0,31,Woman,Cellphone,Occasionally,7
+0,26,Woman,Cellphone,Never,7
+0,28,Man,Cellphone,Occasionally,7
+0,25,Non-binary,Cellphone,Occasionally,6
+0,28,Woman,Cellphone,Occasionally,7
+0,30,Man,Computer or laptop,Occasionally,6
+0,24,Woman,Cellphone,Occasionally,7
+0,30,Woman,Cellphone,Occasionally,8
+0,29,Woman,Cellphone,Never,8
+0,30,Woman,Cellphone,Occasionally,7
+0,35,Man,Cellphone,Occasionally,2
+0,26,Man,Computer or laptop,Never,6
+0,26,Woman,Computer or laptop,Frequently,10
+0,66,Woman,Cellphone,Very often,5
+0,29,Man,Cellphone,Occasionally,7
+0,24,Woman,Cellphone,Occasionally,8
+0,28,Non-binary,Cellphone,Frequently,6
+0,29,Woman,Cellphone,Occasionally,8
+0,26,Prefer not to say,Cellphone,Frequently,5
+0,29,Man,Cellphone,Never,6
+0,28,Woman,Cellphone,Occasionally,7
+0,27,Woman,Cellphone,Occasionally,7
+0,24,Man,Cellphone,Occasionally,5
+0,30,Woman,Cellphone,Occasionally,7
+0,29,Woman,Cellphone,Frequently,7
+0,33,Woman,Cellphone,Occasionally,6
+0,29,Woman,Cellphone,Occasionally,3
+0,25,Woman,Computer or laptop,Occasionally,8
+0,26,Man,Computer or laptop,Occasionally,5
+0,26,Woman,Cellphone,Frequently,6
+0,28,Man,Cellphone,Occasionally,10
+0,30,Woman,Cellphone,Occasionally,6
+0,23,Man,Computer or laptop,Never,6
+0,59,Man,Computer or laptop,Occasionally,3
+0,56,Man,Cellphone,Never,5
+0,34,Man,Computer or laptop,Occasionally,9
+0,23,Woman,Cellphone,Occasionally,8
+0,23,Man,Cellphone,Frequently,8
+0,26,Woman,Cellphone,Frequently,8
+0,24,Woman,Cellphone,Occasionally,6
+0,21,Woman,Cellphone,Occasionally,7
+0,58,Woman,Cellphone,Occasionally,8
+0,24,Woman,Cellphone,Occasionally,4
+0,50,Woman,Cellphone,Occasionally,8
+0,56,Woman,Cellphone,Never,4
+0,54,Man,Cellphone,Occasionally,9
+0,23,Man,Cellphone,Occasionally,5
+0,57,Man,Cellphone,Occasionally,8
+0,51,Woman,Cellphone,Occasionally,7
+0,40,Man,Cellphone,Occasionally,8
+0,22,Woman,Cellphone,Occasionally,6
+0,22,Woman,Cellphone,Occasionally,8
+0,22,Woman,Cellphone,Occasionally,9
+0,51,Man,Computer or laptop,Very often,8
+0,51,Woman,Cellphone,Occasionally,10
+0,48,Woman,Cellphone,Occasionally,6
+0,60,Man,Computer or laptop,Occasionally,8
+0,41,Woman,Cellphone,Occasionally,7
+0,57,Man,Cellphone,Never,7
+0,56,Man,Cellphone,Never,8
+0,66,Man,Computer or laptop,Occasionally,4
+0,43,Woman,Cellphone,Never,7
+0,56,Woman,Cellphone,Never,7
+0,60,Man,Cellphone,Occasionally,6
+0,57,Woman,Cellphone,Occasionally,7
+0,62,Man,Computer or laptop,Never,6
+0,65,Man,Cellphone,Occasionally,8
+0,50,Woman,Cellphone,Never,4
+0,56,Man,Cellphone,Never,3
+0,52,Man,Computer or laptop,Occasionally,8
+0,55,Man,Cellphone,Occasionally,7
+0,56,Woman,Cellphone,Occasionally,6
+0,34,Man,Cellphone,Frequently,8
+0,23,Man,Cellphone,Occasionally,6
+0,72,Man,Cellphone,Never,5
+0,51,Man,Cellphone,Occasionally,5
+0,52,Woman,Cellphone,Occasionally,8
+0,54,Woman,Cellphone,Occasionally,5
+0,24,Man,Cellphone,Never,4
+0,21,Woman,Cellphone,Occasionally,8
+0,85,Woman,Computer or laptop,Occasionally,8
+0,37,Woman,Cellphone,Never,4
+1,29,Woman,Computer or laptop,Occasionally,6
+1,83,Woman,Computer or laptop,Occasionally,8
+1,28,Woman,Cellphone,Occasionally,8
+1,56,Woman,Cellphone,Occasionally,6
+1,23,Woman,Computer or laptop,Frequently,8
+1,29,Man,Cellphone,Occasionally,6
+1,30,Man,Cellphone,Frequently,9
+1,27,Man,Computer or laptop,Frequently,7
+1,24,Woman,Cellphone,Occasionally,4
+1,28,Woman,Computer or laptop,Frequently,7
+1,26,Woman,Computer or laptop,Occasionally,6
+1,25,Woman,Cellphone,Occasionally,6
+1,32,Prefer not to say,Cellphone,Occasionally,6
+1,29,Woman,Cellphone,Occasionally,8
+1,30,Woman,Cellphone,Occasionally,6
+1,29,Man,Cellphone,Never,8
+1,28,Man,Computer or laptop,Frequently,7
+1,25,Man,Cellphone,Occasionally,6
+1,58,Woman,Cellphone,Occasionally,6
+1,25,Woman,Computer or laptop,Occasionally,10
+1,26,Man,Cellphone,Occasionally,9
+1,26,Man,Cellphone,Occasionally,7
+1,31,Non-binary,Cellphone,Frequently,7
+1,29,Man,Cellphone,Occasionally,6
+1,29,Man,Cellphone,Never,6
+1,29,Man,Cellphone,Occasionally,8
+1,30,Man,Cellphone,Never,7
+1,27,Man,Cellphone,Occasionally,8
+1,28,Woman,Cellphone,Occasionally,9
+1,28,Woman,Cellphone,Occasionally,6
+1,29,Man,Cellphone,Frequently,5
+1,28,Man,Cellphone,Occasionally,7
+1,29,Woman,Cellphone,Frequently,8
+1,31,Man,Cellphone,Occasionally,4
+1,30,Woman,Cellphone,Occasionally,8
+1,32,Man,Cellphone,Occasionally,5
+1,26,Man,Cellphone,Frequently,8
+1,28,Man,Cellphone,Never,2
+1,30,Woman,Cellphone,Frequently,8
+1,22,Woman,Cellphone,Frequently,7
+1,31,Man,Cellphone,Occasionally,7
+1,29,Woman,Cellphone,Occasionally,7
+1,31,Woman,Cellphone,Occasionally,10
+1,28,Man,Cellphone,Occasionally,8
+1,23,Man,Cellphone,Frequently,6
+1,20,Woman,Computer or laptop,Occasionally,7
+1,57,Man,Cellphone,Occasionally,8
+1,25,Woman,Cellphone,Occasionally,7
+1,57,Woman,Cellphone,Occasionally,8
+1,28,Man,Cellphone,Frequently,8
+1,22,Woman,Cellphone,Occasionally,6
+1,54,Woman,Cellphone,Occasionally,8
+1,45,Man,Cellphone,Occasionally,6
+1,44,Man,Cellphone,Occasionally,8
+1,53,Woman,Cellphone,Occasionally,7
+1,41,Woman,Cellphone,Occasionally,6
+1,54,Man,Computer or laptop,Occasionally,7
+1,58,Man,Computer or laptop,Occasionally,9
+1,58,Man,Computer or laptop,Occasionally,8
+1,39,Man,Cellphone,Never,7
+1,39,Man,Cellphone,Never,7
+1,25,Non-binary,Computer or laptop,Never,7
+1,43,Man,Cellphone,Occasionally,5
+1,24,Woman,Cellphone,Frequently,8
+1,51,Woman,Cellphone,Occasionally,8
+1,62,Woman,Cellphone,Occasionally,4
+1,56,Woman,Cellphone,Never,7
+1,47,Man,Cellphone,Occasionally,6
+1,56,Woman,Cellphone,Occasionally,8
+1,54,Man,Cellphone,Frequently,8
+1,27,Man,Computer or laptop,Occasionally,6
+1,38,Woman,Cellphone,Occasionally,8
+1,57,Man,Computer or laptop,Never,8
+1,24,Non-binary,Cellphone,Occasionally,6
+1,23,Non-binary,Computer or laptop,Frequently,6
+1,57,Man,Cellphone,Occasionally,7
+1,56,Woman,Cellphone,Never,3
+1,28,Man,Cellphone,Never,7
+1,29,Man,Cellphone,Occasionally,6
+1,50,Woman,Cellphone,Never,8
+1,56,Woman,Cellphone,Occasionally,7
+1,23,Woman,Computer or laptop,Occasionally,4
+1,58,Woman,Cellphone,Never,7
+1,66,Woman,Cellphone,Very often,7
+1,58,Man,Cellphone,Never,6
+1,27,Man,Cellphone,Never,8
+1,22,Man,Computer or laptop,Occasionally,8
+1,21,Woman,Cellphone,Occasionally,6
+1,19,Man,Cellphone,Never,8
+1,18,Man,Computer or laptop,Occasionally,9
+1,21,Woman,Computer or laptop,Very often,7
+1,57,Woman,Cellphone,Never,10
